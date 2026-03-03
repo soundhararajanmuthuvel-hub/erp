@@ -6,6 +6,19 @@ import jsPDF from 'jspdf';
 
 const InvoiceModal = ({ sale, onClose }: { sale: any, onClose: () => void }) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
+  const [company, setCompany] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchCompany = async () => {
+      try {
+        const response = await api.get('/company');
+        setCompany(response.data);
+      } catch (error) {
+        console.error('Error fetching company:', error);
+      }
+    };
+    fetchCompany();
+  }, []);
 
   const handleDownloadPDF = async () => {
     if (!invoiceRef.current) return;
@@ -40,9 +53,19 @@ const InvoiceModal = ({ sale, onClose }: { sale: any, onClose: () => void }) => 
         <div className="flex-1 overflow-auto p-8" ref={invoiceRef}>
           <div className="border p-8 rounded-lg bg-white shadow-sm">
             <div className="flex justify-between mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-emerald-600">NaturalFlow</h1>
-                <p className="text-gray-500">Natural Products Manufacturing</p>
+              <div className="flex gap-4 items-start">
+                {company?.logo && (
+                  <img src={company.logo} alt="Company Logo" className="w-16 h-16 object-contain" />
+                )}
+                <div>
+                  <h1 className="text-3xl font-bold text-emerald-600">{company?.name || 'NaturalFlow'}</h1>
+                  <p className="text-gray-500 text-sm max-w-xs">{company?.address}</p>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {company?.phone && <span>Ph: {company.phone} </span>}
+                    {company?.email && <span>| Email: {company.email}</span>}
+                  </div>
+                  {company?.gstin && <p className="text-xs font-bold text-gray-500 mt-1">GSTIN: {company.gstin}</p>}
+                </div>
               </div>
               <div className="text-right">
                 <h2 className="text-xl font-bold">INVOICE</h2>

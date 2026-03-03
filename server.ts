@@ -65,6 +65,7 @@ import reportRoutes from "./server/routes/reportRoutes";
 import bomRoutes from "./server/routes/bomRoutes";
 import customerRoutes from "./server/routes/customerRoutes";
 import accountingRoutes from "./server/routes/accountingRoutes";
+import companyRoutes from "./server/routes/companyRoutes";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/raw-materials", rawMaterialRoutes);
@@ -75,6 +76,7 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/bom", bomRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/accounting", accountingRoutes);
+app.use("/api/company", companyRoutes);
 
 app.get("/api/debug", (req, res) => {
   res.json({

@@ -9,6 +9,7 @@ import {
   ShoppingCart, 
   FileText, 
   Users,
+  Settings as SettingsIcon,
   Menu,
   X
 } from 'lucide-react';
@@ -19,6 +20,8 @@ import Production from './pages/Production';
 import Sales from './pages/Sales';
 import Reports from './pages/Reports';
 import Customers from './pages/Customers';
+import Settings from './pages/Settings';
+import axios from 'axios';
 
 const SidebarItem = ({ to, icon: Icon, label, onClick }: any) => (
   <Link 
@@ -34,6 +37,22 @@ const SidebarItem = ({ to, icon: Icon, label, onClick }: any) => (
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
+  const [company, setCompany] = React.useState<any>(null);
+
+  const fetchCompany = async () => {
+    try {
+      const response = await axios.get('/api/company');
+      setCompany(response.data);
+    } catch (error) {
+      console.error('Error fetching company:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchCompany();
+    window.addEventListener('company-updated', fetchCompany);
+    return () => window.removeEventListener('company-updated', fetchCompany);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -52,8 +71,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       `}>
         <div className="h-full flex flex-col p-4">
           <div className="flex items-center gap-2 px-4 py-6 mb-6">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold">N</div>
-            <h1 className="text-xl font-bold text-gray-900">NaturalFlow</h1>
+            {company?.logo ? (
+              <img src={company.logo} alt="Logo" className="w-8 h-8 object-contain rounded" />
+            ) : (
+              <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold">
+                {company?.name?.charAt(0) || 'N'}
+              </div>
+            )}
+            <h1 className="text-xl font-bold text-gray-900 truncate">{company?.name || 'NaturalFlow'}</h1>
           </div>
 
           <nav className="flex-1 space-y-1">
@@ -64,6 +89,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <SidebarItem to="/sales" icon={ShoppingCart} label="Sales & Billing" onClick={() => setIsOpen(false)} />
             <SidebarItem to="/customers" icon={Users} label="Customers" onClick={() => setIsOpen(false)} />
             <SidebarItem to="/reports" icon={FileText} label="Reports" onClick={() => setIsOpen(false)} />
+            <SidebarItem to="/settings" icon={SettingsIcon} label="Settings" onClick={() => setIsOpen(false)} />
           </nav>
 
           <div className="pt-4 border-t border-gray-100">
@@ -97,6 +123,7 @@ export default function App() {
           <Route path="/sales" element={<Sales />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Layout>
