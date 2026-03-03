@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Building2, Upload, Save, Globe, Mail, Phone, MapPin, Hash } from 'lucide-react';
 
 interface CompanyDetails {
@@ -35,7 +35,7 @@ const Settings = () => {
 
   const fetchCompany = async () => {
     try {
-      const response = await axios.get('/api/company');
+      const response = await api.get('/company');
       setCompany(response.data);
     } catch (error) {
       console.error('Error fetching company details:', error);
@@ -65,7 +65,7 @@ const Settings = () => {
     setSaving(true);
     setMessage({ type: '', text: '' });
     try {
-      await axios.put('/api/company', company);
+      await api.put('/company', company);
       setMessage({ type: 'success', text: 'Company details updated successfully!' });
       // Refresh sidebar/header if needed (could use a context)
       window.dispatchEvent(new CustomEvent('company-updated'));

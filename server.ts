@@ -1,4 +1,5 @@
 import express from "express";
+console.log("🚀 Starting ERP Server...");
 import { createServer as createViteServer } from "vite";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -20,9 +21,9 @@ const PORT = 3000;
 app.set('trust proxy', 1);
 
 // Security Middlewares
-app.use(helmet({
-  contentSecurityPolicy: false, // Disable for development/Vite compatibility
-}));
+// app.use(helmet({
+//   contentSecurityPolicy: false, // Disable for development/Vite compatibility
+// }));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -102,14 +103,21 @@ async function setupVite() {
       server: { middlewareMode: true },
       appType: "spa",
     });
+    console.log("✅ Vite server created, mounting middleware...");
     app.use(vite.middlewares);
     
     // SPA Fallback for development
     app.get("*", async (req, res, next) => {
-      if (req.path.startsWith('/api')) return next();
+      console.log(`[Vite Fallback] Handling request: ${req.path}`);
+      // Skip API routes and requests with extensions (static assets)
+      if (req.path.startsWith('/api') || req.path.includes('.')) {
+        return next();
+      }
+      
       try {
         const url = req.originalUrl;
-        const template = await (await import("fs/promises")).readFile(path.resolve(__dirname, "index.html"), "utf-8");
+        const templatePath = path.resolve(__dirname, "index.html");
+        const template = await (await import("fs/promises")).readFile(templatePath, "utf-8");
         const html = await vite.transformIndexHtml(url, template);
         res.status(200).set({ "Content-Type": "text/html" }).end(html);
       } catch (e) {
@@ -134,17 +142,20 @@ async function setupVite() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`🚀 ERP Server running on http://localhost:${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 }
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Unhandled Error:', err);
+  console.error('❌ Unhandled Error:', err);
   res.status(500).json({ 
     message: 'Internal Server Error', 
     error: process.env.NODE_ENV === 'development' ? err.message : undefined 
   });
 });
 
-setupVite();
+setupVite().catch(err => {
+  console.error("❌ Failed to start Vite server:", err);
+});

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
 import { useAuth, AuthProvider } from './context/AuthContext';
+import api from './services/api';
 import { 
   LayoutDashboard, 
   Package, 
@@ -21,7 +22,6 @@ import Sales from './pages/Sales';
 import Reports from './pages/Reports';
 import Customers from './pages/Customers';
 import Settings from './pages/Settings';
-import axios from 'axios';
 
 const SidebarItem = ({ to, icon: Icon, label, onClick }: any) => (
   <Link 
@@ -41,8 +41,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const fetchCompany = async () => {
     try {
-      const response = await axios.get('/api/company');
+      console.log('Fetching company details...');
+      const response = await api.get('/company');
       setCompany(response.data);
+      console.log('Company details loaded:', response.data.name);
     } catch (error) {
       console.error('Error fetching company:', error);
     }
