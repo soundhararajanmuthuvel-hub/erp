@@ -37,14 +37,16 @@ const StatCard = ({ title, value, icon: Icon, color, subValue }: any) => (
 const Dashboard = () => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const res = await api.get('/reports/dashboard');
         setStats(res.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
+        setError(err.response?.data?.message || 'Failed to load dashboard stats');
       } finally {
         setLoading(false);
       }
@@ -52,17 +54,29 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  if (loading) return <div>Loading dashboard...</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+    </div>
+  );
 
-  const chartData = [
-    { name: 'Mon', sales: 4000 },
-    { name: 'Tue', sales: 3000 },
-    { name: 'Wed', sales: 2000 },
-    { name: 'Thu', sales: 2780 },
-    { name: 'Fri', sales: 1890 },
-    { name: 'Sat', sales: 2390 },
-    { name: 'Sun', sales: 3490 },
-  ];
+  if (error) return (
+    <div className="bg-rose-50 border border-rose-200 text-rose-700 p-6 rounded-2xl flex flex-col items-center gap-4">
+      <AlertTriangle size={48} />
+      <div className="text-center">
+        <h2 className="text-xl font-bold">Dashboard Error</h2>
+        <p>{error}</p>
+      </div>
+      <button 
+        onClick={() => window.location.reload()}
+        className="bg-rose-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-rose-700"
+      >
+        Retry
+      </button>
+    </div>
+  );
+
+  const chartData = stats?.weeklySales || [];
 
   return (
     <div className="space-y-8">
@@ -74,26 +88,26 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Today's Sales" 
-          value={`₹${stats?.todaySales.toLocaleString()}`} 
+          value={`₹${(stats?.todaySales || 0).toLocaleString()}`} 
           icon={TrendingUp} 
           color="bg-emerald-500" 
         />
         <StatCard 
           title="Production Lots" 
-          value={stats?.todayProduction} 
+          value={stats?.todayProduction || 0} 
           icon={Factory} 
           color="bg-blue-500" 
           subValue="Today"
         />
         <StatCard 
           title="Low Stock Alert" 
-          value={stats?.lowStockCount} 
+          value={stats?.lowStockCount || 0} 
           icon={AlertTriangle} 
           color="bg-amber-500" 
         />
         <StatCard 
           title="Outstanding" 
-          value={`₹${stats?.outstandingAmount.toLocaleString()}`} 
+          value={`₹${(stats?.outstandingAmount || 0).toLocaleString()}`} 
           icon={DollarSign} 
           color="bg-rose-500" 
         />

@@ -28,17 +28,29 @@ const FinishedProducts = () => {
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.post('/finished-products', newProduct);
-    setIsModalOpen(false);
-    fetchData();
+    try {
+      await api.post('/finished-products', newProduct);
+      setIsModalOpen(false);
+      fetchData();
+      setNewProduct({
+        name: '', hsnCode: '', gstPercentage: 18, retailPrice: 0, wholesalePrice: 0, privateLabelPrice: 0, expiryDurationMonths: 12, barcode: ''
+      });
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to add product. Check database connection.');
+    }
   };
 
   const handleSaveBOM = async () => {
-    await api.post('/bom', {
-      finishedProduct: selectedProduct._id,
-      materials: bomMaterials.map(m => ({ material: m.materialId, quantity: m.quantity }))
-    });
-    setIsBomModalOpen(false);
+    try {
+      await api.post('/bom', {
+        finishedProduct: selectedProduct._id,
+        materials: bomMaterials.map(m => ({ material: m.materialId, quantity: m.quantity }))
+      });
+      setIsBomModalOpen(false);
+      alert('BOM saved successfully');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to save BOM. Check database connection.');
+    }
   };
 
   return (

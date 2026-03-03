@@ -33,30 +33,58 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       { $group: { _id: null, total: { $sum: "$outstandingBalance" } } }
     ]);
 
+    // Weekly Sales Data for Chart
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const weeklySales = await Sale.aggregate([
+      { $match: { saleDate: { $gte: sevenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$saleDate" } },
+          sales: { $sum: "$grandTotal" }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
     res.json({
       todaySales: todaySales[0]?.total || 0,
       todayProduction,
       lowStockCount: lowStockMaterials.length,
       expiringCount: expiringProducts.length,
-      outstandingAmount: totalOutstanding[0]?.total || 0
+      outstandingAmount: totalOutstanding[0]?.total || 0,
+      weeklySales: weeklySales.map(s => ({ name: s._id, sales: s.sales }))
     });
   } catch (error: any) {
+    console.error('Dashboard Stats Error:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
 export const getProfitLoss = async (req: Request, res: Response) => {
   try {
+    const { startDate, endDate } = req.query;
+    const dateFilter: any = {};
+    if (startDate && endDate) {
+      dateFilter.$gte = new Date(startDate as string);
+      dateFilter.$lte = new Date(endDate as string);
+    }
+
     const sales = await Sale.aggregate([
+      { $match: startDate ? { saleDate: dateFilter } : {} },
       { $group: { _id: null, totalRevenue: { $sum: "$grandTotal" }, totalGst: { $sum: "$totalGst" } } }
     ]);
 
     const productionCosts = await ProductionLot.aggregate([
-      { $match: { status: 'Completed' } },
+      { $match: { 
+        status: 'Completed',
+        ...(startDate ? { endDate: dateFilter } : {})
+      } },
       { $group: { _id: null, totalCost: { $sum: "$totalProductionCost" } } }
     ]);
 
     const expenses = await Expense.aggregate([
+      { $match: startDate ? { date: dateFilter } : {} },
       { $group: { _id: null, total: { $sum: "$amount" } } }
     ]);
 
@@ -78,13 +106,22 @@ export const getProfitLoss = async (req: Request, res: Response) => {
       netProfit
     });
   } catch (error: any) {
+    console.error('Profit & Loss Error:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
 export const getGstReport = async (req: Request, res: Response) => {
   try {
+    const { startDate, endDate } = req.query;
+    const dateFilter: any = {};
+    if (startDate && endDate) {
+      dateFilter.$gte = new Date(startDate as string);
+      dateFilter.$lte = new Date(endDate as string);
+    }
+
     const report = await Sale.aggregate([
+      { $match: startDate ? { saleDate: dateFilter } : {} },
       {
         $unwind: "$items"
       },
@@ -111,6 +148,7 @@ export const getGstReport = async (req: Request, res: Response) => {
     ]);
     res.json(report);
   } catch (error: any) {
+    console.error('GST Report Error:', error);
     res.status(500).json({ message: error.message });
   }
 };

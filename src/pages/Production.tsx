@@ -30,16 +30,22 @@ const Production = () => {
       await api.post('/production', newLot);
       setIsModalOpen(false);
       fetchData();
+      setNewLot({ finishedProductId: '', targetQuantity: 0, lotNumber: '' });
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Production failed to start');
+      alert(err.response?.data?.message || 'Production failed to start. Check database connection.');
     }
   };
 
   const handleCompleteProduction = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.put(`/production/${selectedLot._id}/complete`, completionData);
-    setIsCompleteModalOpen(false);
-    fetchData();
+    try {
+      await api.put(`/production/${selectedLot._id}/complete`, completionData);
+      setIsCompleteModalOpen(false);
+      fetchData();
+      setCompletionData({ actualYield: 0, wastage: 0 });
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to complete production. Check database connection.');
+    }
   };
 
   return (

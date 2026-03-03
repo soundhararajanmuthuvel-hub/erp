@@ -6,10 +6,12 @@ import Transaction from '../models/Transaction';
 import mongoose from 'mongoose';
 
 export const createSale = async (req: Request, res: Response) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  let session: mongoose.ClientSession | null = null;
 
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
+
     const { 
       customerId, 
       saleType, 
@@ -113,10 +115,11 @@ export const createSale = async (req: Request, res: Response) => {
     await session.commitTransaction();
     res.status(201).json(sale[0]);
   } catch (error: any) {
-    await session.abortTransaction();
+    if (session) await session.abortTransaction();
+    console.error('Sale Error:', error);
     res.status(400).json({ message: error.message });
   } finally {
-    session.endSession();
+    if (session) session.endSession();
   }
 };
 

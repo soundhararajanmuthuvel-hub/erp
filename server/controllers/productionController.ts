@@ -7,10 +7,12 @@ import mongoose from 'mongoose';
 
 export const createProductionLot = async (req: Request, res: Response) => {
   const { finishedProductId, targetQuantity, lotNumber } = req.body;
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  let session: mongoose.ClientSession | null = null;
 
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
+
     const bom = await BOM.findOne({ finishedProduct: finishedProductId }).populate('materials.material');
     if (!bom) throw new Error('BOM not defined for this product');
 
@@ -69,20 +71,23 @@ export const createProductionLot = async (req: Request, res: Response) => {
     await session.commitTransaction();
     res.status(201).json(lot[0]);
   } catch (error: any) {
-    await session.abortTransaction();
+    if (session) await session.abortTransaction();
+    console.error('Production Lot Error:', error);
     res.status(400).json({ message: error.message });
   } finally {
-    session.endSession();
+    if (session) session.endSession();
   }
 };
 
 export const completeProductionLot = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { actualYield, wastage } = req.body;
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  let session: mongoose.ClientSession | null = null;
 
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
+
     const lot = await ProductionLot.findById(id).session(session);
     if (!lot) throw new Error('Lot not found');
 
@@ -111,10 +116,11 @@ export const completeProductionLot = async (req: Request, res: Response) => {
     await session.commitTransaction();
     res.json(lot);
   } catch (error: any) {
-    await session.abortTransaction();
+    if (session) await session.abortTransaction();
+    console.error('Complete Production Error:', error);
     res.status(400).json({ message: error.message });
   } finally {
-    session.endSession();
+    if (session) session.endSession();
   }
 };
 

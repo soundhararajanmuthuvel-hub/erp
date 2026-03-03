@@ -8,6 +8,7 @@ import {
   Factory, 
   ShoppingCart, 
   FileText, 
+  Users,
   Menu,
   X
 } from 'lucide-react';
@@ -17,6 +18,7 @@ import FinishedProducts from './pages/FinishedProducts';
 import Production from './pages/Production';
 import Sales from './pages/Sales';
 import Reports from './pages/Reports';
+import Customers from './pages/Customers';
 
 const SidebarItem = ({ to, icon: Icon, label, onClick }: any) => (
   <Link 
@@ -60,6 +62,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <SidebarItem to="/finished-products" icon={FlaskConical} label="Products" onClick={() => setIsOpen(false)} />
             <SidebarItem to="/production" icon={Factory} label="Production" onClick={() => setIsOpen(false)} />
             <SidebarItem to="/sales" icon={ShoppingCart} label="Sales & Billing" onClick={() => setIsOpen(false)} />
+            <SidebarItem to="/customers" icon={Users} label="Customers" onClick={() => setIsOpen(false)} />
             <SidebarItem to="/reports" icon={FileText} label="Reports" onClick={() => setIsOpen(false)} />
           </nav>
 
@@ -92,6 +95,7 @@ export default function App() {
           <Route path="/finished-products" element={<FinishedProducts />} />
           <Route path="/production" element={<Production />} />
           <Route path="/sales" element={<Sales />} />
+          <Route path="/customers" element={<Customers />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

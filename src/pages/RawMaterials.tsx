@@ -21,16 +21,26 @@ const RawMaterials = () => {
 
   const handleAddMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.post('/raw-materials', newMaterial);
-    setIsModalOpen(false);
-    fetchMaterials();
+    try {
+      await api.post('/raw-materials', newMaterial);
+      setIsModalOpen(false);
+      fetchMaterials();
+      setNewMaterial({ name: '', unit: '', lowStockThreshold: 10 });
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to add material. Check database connection.');
+    }
   };
 
   const handleAddBatch = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.post(`/raw-materials/${selectedMaterial._id}/batch`, newBatch);
-    setIsBatchModalOpen(false);
-    fetchMaterials();
+    try {
+      await api.post(`/raw-materials/${selectedMaterial._id}/batch`, newBatch);
+      setIsBatchModalOpen(false);
+      fetchMaterials();
+      setNewBatch({ batchNumber: '', supplier: '', quantity: 0, purchasePrice: 0, expiryDate: '' });
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to add batch. Check database connection.');
+    }
   };
 
   return (

@@ -28,6 +28,17 @@ app.use("/api/", limiter);
 
 app.use(express.json());
 
+// DB Connection Check Middleware
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/') && req.path !== '/api/health' && req.path !== '/api/debug' && mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ 
+      message: 'Database connection is not ready. Please ensure MONGO_URI is correctly set and your IP is whitelisted in MongoDB Atlas.',
+      dbState: mongoose.connection.readyState
+    });
+  }
+  next();
+});
+
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
@@ -65,6 +76,15 @@ app.use("/api/bom", bomRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/accounting", accountingRoutes);
 
+app.get("/api/debug", (req, res) => {
+  res.json({
+    env: process.env.NODE_ENV,
+    dbStatus: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    dbReadyState: mongoose.connection.readyState,
+    mongodbUriSet: !!MONGODB_URI
+  });
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "ERP Backend is running" });
 });
@@ -89,5 +109,14 @@ async function setupVite() {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }
+
+// Global Error Handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({ 
+    message: 'Internal Server Error', 
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+  });
+});
 
 setupVite();
