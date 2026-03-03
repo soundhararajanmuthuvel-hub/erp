@@ -5,6 +5,10 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config();
@@ -99,12 +103,34 @@ async function setupVite() {
       appType: "spa",
     });
     app.use(vite.middlewares);
+    
+    // SPA Fallback for development
+    app.get("*", async (req, res, next) => {
+      if (req.path.startsWith('/api')) return next();
+      try {
+        const url = req.originalUrl;
+        const template = await (await import("fs/promises")).readFile(path.resolve(__dirname, "index.html"), "utf-8");
+        const html = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ "Content-Type": "text/html" }).end(html);
+      } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
+        next(e);
+      }
+    });
   } else {
     // Serve static files in production
-    app.use(express.static(path.resolve(__dirname, "dist")));
-    app.get("*", (req, res) => {
-      res.sendFile(path.resolve(__dirname, "dist", "index.html"));
-    });
+    const distPath = path.resolve(__dirname, "dist");
+    const fs = await import("fs");
+    if (fs.existsSync(distPath)) {
+      app.use(express.static(distPath));
+      app.get("*", (req, res) => {
+        res.sendFile(path.resolve(distPath, "index.html"));
+      });
+    } else {
+      app.get("*", (req, res) => {
+        res.status(503).send("Application is not built. Please run 'npm run build' first.");
+      });
+    }
   }
 
   app.listen(PORT, "0.0.0.0", () => {
