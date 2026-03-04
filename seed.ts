@@ -9,11 +9,11 @@ const seed = async () => {
     const uri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/erp_db';
     await mongoose.connect(uri);
     
-    const adminExists = await User.findOne({ email: 'admin@naturalflow.com' });
+    const adminExists = await User.findOne({ email: 'admin@aoerp.com' });
     if (!adminExists) {
       await User.create({
         name: 'System Admin',
-        email: 'admin@naturalflow.com',
+        email: 'admin@aoerp.com',
         password: process.env.ADMIN_PASSWORD || 'admin123',
         role: UserRole.ADMIN
       });

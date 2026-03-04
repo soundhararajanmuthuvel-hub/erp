@@ -58,7 +58,7 @@ const InvoiceModal = ({ sale, onClose }: { sale: any, onClose: () => void }) => 
                   <img src={company.logo} alt="Company Logo" className="w-16 h-16 object-contain" />
                 )}
                 <div>
-                  <h1 className="text-3xl font-bold text-emerald-600">{company?.name || 'NaturalFlow'}</h1>
+                  <h1 className="text-3xl font-bold text-emerald-600">{company?.name || 'AO ERP'}</h1>
                   <p className="text-gray-500 text-sm max-w-xs">{company?.address}</p>
                   <div className="text-xs text-gray-400 mt-1">
                     {company?.phone && <span>Ph: {company.phone} </span>}

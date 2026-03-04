@@ -80,7 +80,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 {company?.name?.charAt(0) || 'N'}
               </div>
             )}
-            <h1 className="text-xl font-bold text-gray-900 truncate">{company?.name || 'NaturalFlow'}</h1>
+            <h1 className="text-xl font-bold text-gray-900 truncate">{company?.name || 'AO ERP'}</h1>
           </div>
 
           <nav className="flex-1 space-y-1">

@@ -7,10 +7,10 @@ export const getCompany = async (req: Request, res: Response) => {
     if (!company) {
       // Create a default company if none exists
       company = await Company.create({
-        name: 'NaturalFlow Manufacturing',
+        name: 'AO ERP',
         address: '123 Business Park, Industrial Area',
         phone: '+91 98765 43210',
-        email: 'info@naturalflow.com'
+        email: 'info@aoerp.com'
       });
     }
     res.json(company);

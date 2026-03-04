@@ -1,4 +1,4 @@
-# NaturalFlow ERP - Natural Products Manufacturing ERP
+# AO ERP - Manufacturing ERP System
 
 A production-ready ERP system built with React, Node.js, and MongoDB.
 
@@ -30,7 +30,7 @@ Run the following command to create the initial admin user:
 npm run seed
 ```
 **Default Credentials:**
-- Email: `admin@naturalflow.com`
+- Email: `admin@aoerp.com`
 - Password: `admin123` (or whatever you set in `.env`)
 
 ### 4. Deployment to Vercel
