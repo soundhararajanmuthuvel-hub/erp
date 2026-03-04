@@ -12,12 +12,18 @@ const Production = () => {
   const [completionData, setCompletionData] = useState({ actualYield: 0, wastage: 0 });
 
   const fetchData = async () => {
-    const [prodRes, lotRes] = await Promise.all([
-      api.get('/finished-products'),
-      api.get('/production')
-    ]);
-    setProducts(prodRes.data);
-    setLots(lotRes.data);
+    try {
+      const [prodRes, lotRes] = await Promise.all([
+        api.get('/finished-products'),
+        api.get('/production')
+      ]);
+      setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
+      setLots(Array.isArray(lotRes.data) ? lotRes.data : []);
+    } catch (err) {
+      console.error('Error fetching production data:', err);
+      setProducts([]);
+      setLots([]);
+    }
   };
 
   useEffect(() => {

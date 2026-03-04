@@ -11,8 +11,13 @@ const RawMaterials = () => {
   const [newBatch, setNewBatch] = useState({ batchNumber: '', supplier: '', quantity: 0, purchasePrice: 0, expiryDate: '' });
 
   const fetchMaterials = async () => {
-    const res = await api.get('/raw-materials');
-    setMaterials(res.data);
+    try {
+      const res = await api.get('/raw-materials');
+      setMaterials(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Error fetching materials:', err);
+      setMaterials([]);
+    }
   };
 
   useEffect(() => {

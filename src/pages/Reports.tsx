@@ -21,11 +21,13 @@ const Reports = () => {
         api.get(`/reports/profit-loss?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`),
         api.get(`/reports/gst?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`)
       ]);
-      setPlData(plRes.data);
-      setGstData(gstRes.data);
+      setPlData(plRes.data || null);
+      setGstData(Array.isArray(gstRes.data) ? gstRes.data : []);
     } catch (err: any) {
-      console.error(err);
+      console.error('Error fetching reports:', err);
       setError(err.response?.data?.message || 'Failed to load report data');
+      setPlData(null);
+      setGstData([]);
     } finally {
       setLoading(false);
     }

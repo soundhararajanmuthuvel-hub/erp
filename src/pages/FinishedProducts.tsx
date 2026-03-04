@@ -14,12 +14,18 @@ const FinishedProducts = () => {
   const [bomMaterials, setBomMaterials] = useState<any[]>([]);
 
   const fetchData = async () => {
-    const [prodRes, matRes] = await Promise.all([
-      api.get('/finished-products'),
-      api.get('/raw-materials')
-    ]);
-    setProducts(prodRes.data);
-    setMaterials(matRes.data);
+    try {
+      const [prodRes, matRes] = await Promise.all([
+        api.get('/finished-products'),
+        api.get('/raw-materials')
+      ]);
+      setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
+      setMaterials(Array.isArray(matRes.data) ? matRes.data : []);
+    } catch (err) {
+      console.error('Error fetching products/materials:', err);
+      setProducts([]);
+      setMaterials([]);
+    }
   };
 
   useEffect(() => {

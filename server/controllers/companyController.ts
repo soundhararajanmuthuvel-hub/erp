@@ -12,6 +12,11 @@ export const getCompany = async (req: Request, res: Response) => {
         phone: '+91 98765 43210',
         email: 'info@aoerp.com'
       });
+    } else if (company.name === 'NaturalFlow Manufacturing') {
+      // Migrate old branding
+      company.name = 'AO ERP';
+      if (company.email === 'info@naturalflow.com') company.email = 'info@aoerp.com';
+      await company.save();
     }
     res.json(company);
   } catch (error: any) {
@@ -25,14 +30,14 @@ export const updateCompany = async (req: Request, res: Response) => {
     let company = await Company.findOne();
     
     if (company) {
-      company.name = name || company.name;
-      company.address = address || company.address;
-      company.phone = phone || company.phone;
-      company.email = email || company.email;
-      company.website = website || company.website;
-      company.gstin = gstin || company.gstin;
-      company.pan = pan || company.pan;
-      company.logo = logo || company.logo;
+      company.name = name !== undefined ? name : company.name;
+      company.address = address !== undefined ? address : company.address;
+      company.phone = phone !== undefined ? phone : company.phone;
+      company.email = email !== undefined ? email : company.email;
+      company.website = website !== undefined ? website : company.website;
+      company.gstin = gstin !== undefined ? gstin : company.gstin;
+      company.pan = pan !== undefined ? pan : company.pan;
+      company.logo = logo !== undefined ? logo : company.logo;
       await company.save();
     } else {
       company = await Company.create({
@@ -42,6 +47,7 @@ export const updateCompany = async (req: Request, res: Response) => {
     
     res.json(company);
   } catch (error: any) {
+    console.error('Update Company Error:', error);
     res.status(500).json({ message: error.message });
   }
 };

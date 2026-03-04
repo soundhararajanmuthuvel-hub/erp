@@ -18,9 +18,10 @@ const Customers = () => {
   const fetchCustomers = async () => {
     try {
       const res = await api.get('/customers');
-      setCustomers(res.data);
+      setCustomers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching customers:', err);
+      setCustomers([]);
     }
   };
 

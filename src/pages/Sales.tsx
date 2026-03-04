@@ -103,7 +103,7 @@ const InvoiceModal = ({ sale, onClose }: { sale: any, onClose: () => void }) => 
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {sale.items.map((item: any, i: number) => (
+                {sale.items?.map((item: any, i: number) => (
                   <tr key={i}>
                     <td className="py-3 font-medium">{item.product?.name}</td>
                     <td className="py-3 text-gray-600">{item.batchNumber}</td>
@@ -162,14 +162,21 @@ const Sales = () => {
   });
 
   const fetchData = async () => {
-    const [prodRes, saleRes, custRes] = await Promise.all([
-      api.get('/finished-products'),
-      api.get('/sales'),
-      api.get('/customers')
-    ]);
-    setProducts(prodRes.data);
-    setSales(saleRes.data);
-    setCustomers(custRes.data);
+    try {
+      const [prodRes, saleRes, custRes] = await Promise.all([
+        api.get('/finished-products'),
+        api.get('/sales'),
+        api.get('/customers')
+      ]);
+      setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
+      setSales(Array.isArray(saleRes.data) ? saleRes.data : []);
+      setCustomers(Array.isArray(custRes.data) ? custRes.data : []);
+    } catch (err) {
+      console.error('Error fetching sales data:', err);
+      setProducts([]);
+      setSales([]);
+      setCustomers([]);
+    }
   };
 
   useEffect(() => {
