@@ -54,11 +54,20 @@ if (!MONGODB_URI) {
   console.error("Falling back to local connection attempt (likely to fail in cloud environments)...");
 }
 
-mongoose.connect(MONGODB_URI || "mongodb://localhost:27017/erp_db")
-  .then(() => console.log("Connected to MongoDB"))
+mongoose.connect(MONGODB_URI || "mongodb://localhost:27017/erp_db", {
+  serverSelectionTimeoutMS: 5000,
+})
+  .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => {
-    console.error("MongoDB connection error:", err.message);
-    console.error("Ensure your MongoDB instance is running and accessible.");
+    console.error("❌ MongoDB connection error:", err.message);
+    if (err.message.includes('IP') || err.message.includes('whitelist')) {
+      console.error("\n👉 ACTION REQUIRED: Your IP is not whitelisted in MongoDB Atlas.");
+      console.error("1. Go to https://cloud.mongodb.com/");
+      console.error("2. Go to 'Network Access' under the Security section.");
+      console.error("3. Click 'Add IP Address'.");
+      console.error("4. Select 'Allow Access From Anywhere' (0.0.0.0/0) and Save.");
+      console.error("This is necessary because the AI Studio environment uses dynamic IP addresses.\n");
+    }
   });
 
 // --- API Routes ---

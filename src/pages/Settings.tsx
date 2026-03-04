@@ -99,6 +99,22 @@ const Settings = () => {
         </div>
       )}
 
+      {/* Database Connection Status */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${loading ? 'bg-gray-100' : company ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+            <Hash size={20} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-900">Database Status</p>
+            <p className="text-xs text-gray-500">
+              {loading ? 'Checking...' : company ? 'Connected to MongoDB Atlas' : 'Disconnected - Check IP Whitelist'}
+            </p>
+          </div>
+        </div>
+        <div className={`w-3 h-3 rounded-full ${loading ? 'bg-gray-300 animate-pulse' : company ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+      </div>
+
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Logo Section */}
         <div className="lg:col-span-1">

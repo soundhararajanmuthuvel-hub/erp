@@ -38,26 +38,84 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
   const [company, setCompany] = React.useState<any>(null);
+  const [dbError, setDbError] = React.useState<any>(null);
 
   const fetchCompany = async () => {
     try {
       console.log('Fetching company details...');
       const response = await api.get('/company');
       setCompany(response.data);
+      setDbError(null);
       console.log('Company details loaded:', response.data.name);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching company:', error);
     }
   };
 
   React.useEffect(() => {
     fetchCompany();
+    
+    const handleDbError = (e: any) => {
+      setDbError(e.detail);
+    };
+
     window.addEventListener('company-updated', fetchCompany);
-    return () => window.removeEventListener('company-updated', fetchCompany);
+    window.addEventListener('db-connection-error', handleDbError);
+    
+    return () => {
+      window.removeEventListener('company-updated', fetchCompany);
+      window.removeEventListener('db-connection-error', handleDbError);
+    };
   }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* DB Error Overlay */}
+      {dbError && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl border border-rose-100">
+            <div className="flex items-center gap-4 mb-6 text-rose-600">
+              <div className="p-3 bg-rose-50 rounded-2xl">
+                <X size={32} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Database Connection Error</h2>
+                <p className="text-rose-500 font-medium">Your IP is likely not whitelisted in MongoDB Atlas.</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs">!</span>
+                  How to fix this (Action Required):
+                </h3>
+                <ol className="space-y-3 text-gray-600 list-decimal ml-4">
+                  <li>Log in to your <a href="https://cloud.mongodb.com/" target="_blank" rel="noreferrer" className="text-emerald-600 font-bold underline">MongoDB Atlas Dashboard</a>.</li>
+                  <li>In the left sidebar, click <strong>Network Access</strong> (under Security).</li>
+                  <li>Click the green <strong>Add IP Address</strong> button.</li>
+                  <li>Click <strong>Allow Access From Anywhere</strong> (adds 0.0.0.0/0).</li>
+                  <li>Click <strong>Confirm</strong> and wait 60 seconds for it to apply.</li>
+                </ol>
+              </div>
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="flex-1 bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all"
+                >
+                  I've whitelisted it, Reload App
+                </button>
+              </div>
+              
+              <p className="text-center text-xs text-gray-400">
+                This error occurs because the AI Studio environment uses dynamic IP addresses that change frequently.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Menu Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}

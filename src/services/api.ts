@@ -15,6 +15,9 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 503) {
+      window.dispatchEvent(new CustomEvent('db-connection-error', { detail: error.response.data }));
+    }
     console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
   }
