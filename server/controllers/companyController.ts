@@ -7,15 +7,17 @@ export const getCompany = async (req: Request, res: Response) => {
     if (!company) {
       // Create a default company if none exists
       company = await Company.create({
-        name: 'AO ERP',
+        name: 'Amudhasurabiy Organics',
         address: '123 Business Park, Industrial Area',
         phone: '+91 98765 43210',
-        email: 'info@aoerp.com'
+        email: 'info@amudhasurabiy.com'
       });
-    } else if (company.name === 'NaturalFlow Manufacturing') {
+    } else if (company.name === 'AO ERP' || company.name === 'NaturalFlow Manufacturing') {
       // Migrate old branding
-      company.name = 'AO ERP';
-      if (company.email === 'info@naturalflow.com') company.email = 'info@aoerp.com';
+      company.name = 'Amudhasurabiy Organics';
+      if (company.email === 'info@aoerp.com' || company.email === 'info@naturalflow.com') {
+        company.email = 'info@amudhasurabiy.com';
+      }
       await company.save();
     }
     res.json(company);

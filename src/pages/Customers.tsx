@@ -4,8 +4,12 @@ import { Plus, User, Phone, MapPin, CreditCard, Search } from 'lucide-react';
 
 const Customers = () => {
   const [customers, setCustomers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
   const [newCustomer, setNewCustomer] = useState({
     name: '',
     phone: '',
@@ -16,12 +20,15 @@ const Customers = () => {
   });
 
   const fetchCustomers = async () => {
+    setLoading(true);
     try {
       const res = await api.get('/customers');
       setCustomers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error fetching customers:', err);
       setCustomers([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,8 +39,20 @@ const Customers = () => {
   const handleCreateCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/customers', newCustomer);
+      if (isEditMode && selectedCustomer) {
+        await api.put(`/customers/${selectedCustomer._id}`, newCustomer);
+      } else {
+        await api.post('/customers', newCustomer);
+      }
+      
       setIsModalOpen(false);
+      setIsEditMode(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      
+      // Delay for DB consistency
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       fetchCustomers();
       setNewCustomer({
         name: '',
@@ -44,7 +63,7 @@ const Customers = () => {
         creditLimit: 50000
       });
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to add customer');
+      alert(err.response?.data?.message || 'Failed to save customer');
     }
   };
 
@@ -55,6 +74,12 @@ const Customers = () => {
 
   return (
     <div className="space-y-6">
+      {showSuccess && (
+        <div className="fixed top-4 right-4 z-[100] bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg animate-bounce flex items-center gap-2">
+          <User size={20} />
+          <span className="font-bold">Customer saved successfully!</span>
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Customer Management</h1>
@@ -82,7 +107,22 @@ const Customers = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCustomers.map((c) => (
+        {loading ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mb-4"></div>
+            <p className="text-gray-500 font-medium">Loading customers...</p>
+          </div>
+        ) : filteredCustomers.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
+            <div className="p-4 bg-gray-50 rounded-full mb-4">
+              <User size={40} className="text-gray-300" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900">No Customers Found</h3>
+            <p className="text-gray-500 max-w-xs text-center mt-1">
+              {searchTerm ? "No customers match your search." : "Your customer list is empty. Click 'Add Customer' to create your first client."}
+            </p>
+          </div>
+        ) : filteredCustomers.map((c) => (
           <div key={c._id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
@@ -117,7 +157,22 @@ const Customers = () => {
               <button className="flex-1 text-sm font-bold text-emerald-600 hover:bg-emerald-50 py-2 rounded-lg transition-colors">
                 View Ledger
               </button>
-              <button className="flex-1 text-sm font-bold text-blue-600 hover:bg-blue-50 py-2 rounded-lg transition-colors">
+              <button 
+                onClick={() => {
+                  setSelectedCustomer(c);
+                  setNewCustomer({
+                    name: c.name,
+                    phone: c.phone,
+                    email: c.email || '',
+                    address: c.address || '',
+                    gstNumber: c.gstNumber || '',
+                    creditLimit: c.creditLimit || 50000
+                  });
+                  setIsEditMode(true);
+                  setIsModalOpen(true);
+                }}
+                className="flex-1 text-sm font-bold text-blue-600 hover:bg-blue-50 py-2 rounded-lg transition-colors"
+              >
                 Edit
               </button>
             </div>
@@ -126,15 +181,15 @@ const Customers = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-6">Add New Customer</h2>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <h2 className="text-xl font-bold mb-6">{isEditMode ? 'Edit Customer' : 'Add New Customer'}</h2>
             <form onSubmit={handleCreateCustomer} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Full Name</label>
                 <input 
                   required 
-                  className="w-full border rounded-lg p-2" 
+                  className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none" 
                   value={newCustomer.name}
                   onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
                 />
@@ -144,7 +199,7 @@ const Customers = () => {
                   <label className="block text-sm font-medium mb-1">Phone</label>
                   <input 
                     required 
-                    className="w-full border rounded-lg p-2" 
+                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none" 
                     value={newCustomer.phone}
                     onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
                   />
@@ -152,7 +207,7 @@ const Customers = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1">GST Number</label>
                   <input 
-                    className="w-full border rounded-lg p-2" 
+                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none" 
                     value={newCustomer.gstNumber}
                     onChange={e => setNewCustomer({...newCustomer, gstNumber: e.target.value})}
                   />
@@ -162,7 +217,7 @@ const Customers = () => {
                 <label className="block text-sm font-medium mb-1">Email</label>
                 <input 
                   type="email"
-                  className="w-full border rounded-lg p-2" 
+                  className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none" 
                   value={newCustomer.email}
                   onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
                 />
@@ -170,7 +225,7 @@ const Customers = () => {
               <div>
                 <label className="block text-sm font-medium mb-1">Address</label>
                 <textarea 
-                  className="w-full border rounded-lg p-2" 
+                  className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none" 
                   rows={2}
                   value={newCustomer.address}
                   onChange={e => setNewCustomer({...newCustomer, address: e.target.value})}
@@ -180,14 +235,36 @@ const Customers = () => {
                 <label className="block text-sm font-medium mb-1">Credit Limit (₹)</label>
                 <input 
                   type="number"
-                  className="w-full border rounded-lg p-2" 
+                  className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none" 
                   value={newCustomer.creditLimit}
                   onChange={e => setNewCustomer({...newCustomer, creditLimit: Number(e.target.value)})}
                 />
               </div>
               <div className="flex gap-4 pt-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 border py-2 rounded-lg">Cancel</button>
-                <button type="submit" className="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold">Save Customer</button>
+                <button type="button" onClick={() => { setIsModalOpen(false); setIsEditMode(false); }} className="flex-1 border py-2 rounded-lg font-medium">Cancel</button>
+                {isEditMode && (
+                  <button 
+                    type="button" 
+                    onClick={async () => {
+                      if (window.confirm('Delete this customer?')) {
+                        try {
+                          await api.delete(`/customers/${selectedCustomer._id}`);
+                          setIsModalOpen(false);
+                          setIsEditMode(false);
+                          fetchCustomers();
+                        } catch (err: any) {
+                          alert(err.response?.data?.message || 'Delete failed');
+                        }
+                      }
+                    }}
+                    className="flex-1 bg-rose-50 text-rose-600 py-2 rounded-lg font-bold border border-rose-100"
+                  >
+                    Delete
+                  </button>
+                )}
+                <button type="submit" className="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold shadow-lg shadow-emerald-100">
+                  {isEditMode ? 'Update' : 'Save Customer'}
+                </button>
               </div>
             </form>
           </div>

@@ -132,3 +132,13 @@ export const getLots = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const deleteProductionLot = async (req: Request, res: Response) => {
+  try {
+    const lot = await ProductionLot.findByIdAndDelete(req.params.id);
+    if (!lot) return res.status(404).json({ message: 'Lot not found' });
+    res.json({ message: 'Lot deleted successfully' });
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};

@@ -5,13 +5,16 @@ import { Play, CheckCircle, AlertCircle, Factory } from 'lucide-react';
 const Production = () => {
   const [lots, setLots] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedLot, setSelectedLot] = useState<any>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [newLot, setNewLot] = useState({ finishedProductId: '', targetQuantity: 0, lotNumber: '' });
   const [completionData, setCompletionData] = useState({ actualYield: 0, wastage: 0 });
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const [prodRes, lotRes] = await Promise.all([
         api.get('/finished-products'),
@@ -23,6 +26,8 @@ const Production = () => {
       console.error('Error fetching production data:', err);
       setProducts([]);
       setLots([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,6 +40,12 @@ const Production = () => {
     try {
       await api.post('/production', newLot);
       setIsModalOpen(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      
+      // Delay for consistency
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       fetchData();
       setNewLot({ finishedProductId: '', targetQuantity: 0, lotNumber: '' });
     } catch (err: any) {
@@ -47,6 +58,12 @@ const Production = () => {
     try {
       await api.put(`/production/${selectedLot._id}/complete`, completionData);
       setIsCompleteModalOpen(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      
+      // Delay for consistency
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       fetchData();
       setCompletionData({ actualYield: 0, wastage: 0 });
     } catch (err: any) {
@@ -56,6 +73,12 @@ const Production = () => {
 
   return (
     <div className="space-y-6">
+      {showSuccess && (
+        <div className="fixed top-4 right-4 z-[100] bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg animate-bounce flex items-center gap-2">
+          <Factory size={20} />
+          <span className="font-bold">Production updated successfully!</span>
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Production Lots</h1>
         <button 
@@ -91,14 +114,31 @@ const Production = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  {l.status === 'In Progress' && (
+                  <div className="flex gap-3">
+                    {l.status === 'In Progress' && (
+                      <button 
+                        onClick={() => { setSelectedLot(l); setIsCompleteModalOpen(true); }}
+                        className="text-emerald-600 hover:text-emerald-700 font-bold text-xs"
+                      >
+                        Complete
+                      </button>
+                    )}
                     <button 
-                      onClick={() => { setSelectedLot(l); setIsCompleteModalOpen(true); }}
-                      className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
+                      onClick={async () => {
+                        if (window.confirm('Delete this lot?')) {
+                          try {
+                            await api.delete(`/production/${l._id}`);
+                            fetchData();
+                          } catch (err: any) {
+                            alert(err.response?.data?.message || 'Delete failed');
+                          }
+                        }
+                      }}
+                      className="text-gray-400 hover:text-rose-600 font-bold text-xs"
                     >
-                      Complete
+                      Delete
                     </button>
-                  )}
+                  </div>
                 </td>
               </tr>
             ))}

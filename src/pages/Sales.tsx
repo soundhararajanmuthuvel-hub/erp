@@ -58,7 +58,7 @@ const InvoiceModal = ({ sale, onClose }: { sale: any, onClose: () => void }) => 
                   <img src={company.logo} alt="Company Logo" className="w-16 h-16 object-contain" />
                 )}
                 <div>
-                  <h1 className="text-3xl font-bold text-emerald-600">{company?.name || 'AO ERP'}</h1>
+                  <h1 className="text-3xl font-bold text-emerald-600">{company?.name || 'Amudhasurabiy Organics'}</h1>
                   <p className="text-gray-500 text-sm max-w-xs">{company?.address}</p>
                   <div className="text-xs text-gray-400 mt-1">
                     {company?.phone && <span>Ph: {company.phone} </span>}
@@ -342,8 +342,17 @@ const Sales = () => {
                         onChange={e => handleProductChange(idx, e.target.value)}
                       >
                         <option value="">Select Product</option>
-                        {products.map(p => <option key={p._id} value={p._id}>{p.name} (Stock: {p.totalStock})</option>)}
+                        {products.map(p => (
+                          <option key={p._id} value={p._id} disabled={p.totalStock <= 0}>
+                            {p.name} {p.totalStock <= 0 ? '(OUT OF STOCK)' : `(Stock: ${p.totalStock})`}
+                          </option>
+                        ))}
                       </select>
+                      {item.productId && products.find(p => p._id === item.productId)?.totalStock <= 0 && (
+                        <p className="text-[10px] text-rose-600 mt-1 font-bold">
+                          ⚠️ No stock available. Add stock in Products page first.
+                        </p>
+                      )}
                     </div>
                     <div className="md:col-span-3">
                       <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Batch</label>

@@ -34,3 +34,23 @@ export const addBatch = async (req: Request, res: Response) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const updateRawMaterial = async (req: Request, res: Response) => {
+  try {
+    const material = await RawMaterial.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!material) return res.status(404).json({ message: 'Material not found' });
+    res.json(material);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const deleteRawMaterial = async (req: Request, res: Response) => {
+  try {
+    const material = await RawMaterial.findByIdAndDelete(req.params.id);
+    if (!material) return res.status(404).json({ message: 'Material not found' });
+    res.json({ message: 'Material deleted successfully' });
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};

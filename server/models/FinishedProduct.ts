@@ -39,7 +39,11 @@ const FinishedProductSchema: Schema = new Schema({
 }, { timestamps: true });
 
 FinishedProductSchema.pre('save', function() {
-  this.totalStock = (this.batches as any[]).reduce((acc, batch) => acc + batch.quantity, 0);
+  if (this.batches && Array.isArray(this.batches)) {
+    this.totalStock = (this.batches as any[]).reduce((acc, batch) => acc + batch.quantity, 0);
+  } else {
+    this.totalStock = 0;
+  }
 });
 
 export default mongoose.model<IFinishedProduct>('FinishedProduct', FinishedProductSchema);

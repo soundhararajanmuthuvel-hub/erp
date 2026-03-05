@@ -138,7 +138,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 {company?.name?.charAt(0) || 'N'}
               </div>
             )}
-            <h1 className="text-xl font-bold text-gray-900 truncate">{company?.name || 'AO ERP'}</h1>
+            <h1 className="text-xl font-bold text-gray-900 truncate">{company?.name || 'Amudhasurabiy Organics'}</h1>
           </div>
 
           <nav className="flex-1 space-y-1">
@@ -163,7 +163,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Main Content */}
       <main className="flex-1 p-4 lg:p-8 overflow-auto">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto pt-12 lg:pt-0">
           {children}
         </div>
       </main>
