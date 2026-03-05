@@ -3,8 +3,11 @@ import FinishedProduct from '../models/FinishedProduct';
 
 export const getFinishedProducts = async (req: Request, res: Response) => {
   try {
-    const products = await FinishedProduct.find();
-    console.log(`[Backend] Found ${products.length} finished products`);
+    const products = await FinishedProduct.find().lean();
+    console.log(`[Backend] GET /finished-products - Found ${products.length} products`);
+    if (products.length > 0) {
+      console.log(`[Backend] First product name: ${products[0].name}`);
+    }
     res.json(products);
   } catch (error: any) {
     console.error('[Backend] Error fetching finished products:', error.message);
@@ -14,12 +17,12 @@ export const getFinishedProducts = async (req: Request, res: Response) => {
 
 export const addFinishedProduct = async (req: Request, res: Response) => {
   try {
-    console.log('Creating new finished product:', req.body.name);
+    console.log('[Backend] POST /finished-products - Body:', JSON.stringify(req.body));
     const product = await FinishedProduct.create(req.body);
-    console.log('Product created successfully in DB:', JSON.stringify(product, null, 2));
+    console.log('[Backend] Product created successfully with ID:', product._id);
     res.status(201).json(product);
   } catch (error: any) {
-    console.error('Error creating finished product:', error.message);
+    console.error('[Backend] Error creating finished product:', error.message);
     if (error.code === 11000) {
       return res.status(400).json({ message: 'A product with this name already exists. Please use a unique name.' });
     }

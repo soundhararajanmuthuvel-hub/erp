@@ -22,7 +22,7 @@ const Customers = () => {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/customers');
+      const res = await api.get(`/customers?t=${Date.now()}`);
       console.log(`[Frontend] Received ${res.data.length} customers`);
       setCustomers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {

@@ -22,18 +22,22 @@ const FinishedProducts = () => {
 
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = async (isManual = false) => {
     setLoading(true);
     setError(null);
     try {
       console.log('Fetching products and materials...');
       const [prodRes, matRes] = await Promise.all([
-        api.get('/finished-products'),
-        api.get('/raw-materials')
+        api.get(`/finished-products?t=${Date.now()}`),
+        api.get(`/raw-materials?t=${Date.now()}`)
       ]);
       console.log(`[Frontend] Received ${prodRes.data.length} products and ${matRes.data.length} materials`);
       setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
       setMaterials(Array.isArray(matRes.data) ? matRes.data : []);
+      if (isManual) {
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 2000);
+      }
     } catch (err: any) {
       console.error('Error fetching products/materials:', err);
       setError(err.response?.data?.message || 'Failed to load products. Check database connection.');
@@ -138,11 +142,12 @@ const FinishedProducts = () => {
         </div>
         <div className="flex gap-2">
           <button 
-            onClick={fetchData}
-            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+            onClick={() => fetchData(true)}
+            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex items-center gap-2"
             title="Refresh Data"
           >
-            <RefreshCw size={20} />
+            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+            <span className="text-xs font-bold hidden sm:inline">Refresh</span>
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
@@ -462,6 +467,14 @@ const FinishedProducts = () => {
           </div>
         </div>
       )}
+      {/* Debug Info (Always visible for now to help troubleshoot) */}
+      <div className="mt-8 p-4 bg-gray-50 rounded-xl border border-gray-200 text-[10px] font-mono text-gray-400">
+        <p className="font-bold text-gray-500 mb-1">System Debug Info:</p>
+        <p>Products Count: {products.length}</p>
+        <p>Loading State: {loading ? 'True' : 'False'}</p>
+        <p>Last Fetch: {new Date().toLocaleTimeString()}</p>
+        {products.length === 0 && <p className="text-rose-400">Warning: No products returned from API.</p>}
+      </div>
     </div>
   );
 };

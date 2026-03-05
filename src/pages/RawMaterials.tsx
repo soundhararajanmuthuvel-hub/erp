@@ -19,7 +19,7 @@ const RawMaterials = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/raw-materials');
+      const res = await api.get(`/raw-materials?t=${Date.now()}`);
       console.log(`[Frontend] Received ${res.data.length} materials`);
       setMaterials(Array.isArray(res.data) ? res.data : []);
     } catch (err: any) {

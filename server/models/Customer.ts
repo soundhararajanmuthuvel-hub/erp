@@ -34,6 +34,6 @@ const CustomerSchema: Schema = new Schema({
     balance: { type: Number },
     referenceId: { type: String }
   }]
-}, { timestamps: true });
+}, { timestamps: true, collection: 'customers' });
 
 export default mongoose.model<ICustomer>('Customer', CustomerSchema);

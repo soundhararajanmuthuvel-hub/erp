@@ -36,7 +36,7 @@ const FinishedProductSchema: Schema = new Schema({
     productionCost: { type: Number, required: true }
   }],
   totalStock: { type: Number, default: 0 }
-}, { timestamps: true });
+}, { timestamps: true, collection: 'finished_products' });
 
 FinishedProductSchema.pre('save', function() {
   if (this.batches && Array.isArray(this.batches)) {

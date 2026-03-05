@@ -28,7 +28,7 @@ const RawMaterialSchema: Schema = new Schema({
     receivedDate: { type: Date, default: Date.now }
   }],
   totalStock: { type: Number, default: 0 }
-}, { timestamps: true });
+}, { timestamps: true, collection: 'raw_materials' });
 
 // Pre-save to calculate total stock
 RawMaterialSchema.pre('save', function() {
