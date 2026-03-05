@@ -23,6 +23,7 @@ const Customers = () => {
     setLoading(true);
     try {
       const res = await api.get('/customers');
+      console.log(`[Frontend] Received ${res.data.length} customers`);
       setCustomers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error fetching customers:', err);
@@ -40,9 +41,11 @@ const Customers = () => {
     e.preventDefault();
     try {
       if (isEditMode && selectedCustomer) {
-        await api.put(`/customers/${selectedCustomer._id}`, newCustomer);
+        const res = await api.put(`/customers/${selectedCustomer._id}`, newCustomer);
+        console.log('Customer updated:', res.data);
       } else {
-        await api.post('/customers', newCustomer);
+        const res = await api.post('/customers', newCustomer);
+        console.log('Customer created:', res.data);
       }
       
       setIsModalOpen(false);

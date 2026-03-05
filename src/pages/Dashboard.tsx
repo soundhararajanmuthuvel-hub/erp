@@ -7,7 +7,8 @@ import {
   Clock, 
   DollarSign,
   Factory,
-  ShoppingCart
+  ShoppingCart,
+  RefreshCw
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -85,9 +86,18 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
           <p className="text-gray-500">Welcome back to Amudhasurabiy Organics</p>
         </div>
-        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-100 shadow-sm">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Database Connected</span>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => window.location.reload()}
+            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+            title="Refresh Dashboard"
+          >
+            <RefreshCw size={20} />
+          </button>
+          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-100 shadow-sm">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Database Connected</span>
+          </div>
         </div>
       </header>
 

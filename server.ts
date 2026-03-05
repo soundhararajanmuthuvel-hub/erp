@@ -57,7 +57,14 @@ if (!MONGODB_URI) {
 mongoose.connect(MONGODB_URI || "mongodb://localhost:27017/erp_db", {
   serverSelectionTimeoutMS: 5000,
 })
-  .then(() => console.log("✅ Connected to MongoDB"))
+  .then(() => {
+    const dbName = mongoose.connection.name;
+    const host = mongoose.connection.host;
+    console.log(`✅ Connected to MongoDB: ${dbName} at ${host}`);
+    if (host === 'localhost' || host === '127.0.0.1') {
+      console.warn("⚠️ WARNING: Using local MongoDB. Data will be lost on restart. Please set MONGODB_URI.");
+    }
+  })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);
     if (err.message.includes('IP') || err.message.includes('whitelist')) {

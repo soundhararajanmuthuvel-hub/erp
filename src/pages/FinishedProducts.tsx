@@ -31,8 +31,7 @@ const FinishedProducts = () => {
         api.get('/finished-products'),
         api.get('/raw-materials')
       ]);
-      console.log('[Frontend] Finished Products Response:', prodRes.data);
-      console.log('[Frontend] Raw Materials Response:', matRes.data);
+      console.log(`[Frontend] Received ${prodRes.data.length} products and ${matRes.data.length} materials`);
       setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
       setMaterials(Array.isArray(matRes.data) ? matRes.data : []);
     } catch (err: any) {
@@ -69,9 +68,11 @@ const FinishedProducts = () => {
       };
 
       if (isEditMode && selectedProduct) {
-        await api.put(`/finished-products/${selectedProduct._id}`, sanitizedProduct);
+        const res = await api.put(`/finished-products/${selectedProduct._id}`, sanitizedProduct);
+        console.log('Product updated:', res.data);
       } else {
-        await api.post('/finished-products', sanitizedProduct);
+        const res = await api.post('/finished-products', sanitizedProduct);
+        console.log('Product created:', res.data);
       }
       
       setIsModalOpen(false);

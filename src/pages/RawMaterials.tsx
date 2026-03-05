@@ -20,6 +20,7 @@ const RawMaterials = () => {
     setError(null);
     try {
       const res = await api.get('/raw-materials');
+      console.log(`[Frontend] Received ${res.data.length} materials`);
       setMaterials(Array.isArray(res.data) ? res.data : []);
     } catch (err: any) {
       console.error('Error fetching materials:', err);
@@ -44,9 +45,11 @@ const RawMaterials = () => {
       };
 
       if (isEditMode && selectedMaterial) {
-        await api.put(`/raw-materials/${selectedMaterial._id}`, sanitizedMaterial);
+        const res = await api.put(`/raw-materials/${selectedMaterial._id}`, sanitizedMaterial);
+        console.log('Material updated:', res.data);
       } else {
-        await api.post('/raw-materials', sanitizedMaterial);
+        const res = await api.post('/raw-materials', sanitizedMaterial);
+        console.log('Material created:', res.data);
       }
       
       setIsModalOpen(false);

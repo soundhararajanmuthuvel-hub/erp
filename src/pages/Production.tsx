@@ -22,6 +22,7 @@ const Production = () => {
       ]);
       setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
       setLots(Array.isArray(lotRes.data) ? lotRes.data : []);
+      console.log(`[Frontend] Received ${lotRes.data.length} production lots`);
     } catch (err) {
       console.error('Error fetching production data:', err);
       setProducts([]);
@@ -38,7 +39,8 @@ const Production = () => {
   const handleStartProduction = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/production', newLot);
+      const res = await api.post('/production', newLot);
+      console.log('Production lot started:', res.data);
       setIsModalOpen(false);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
@@ -56,7 +58,8 @@ const Production = () => {
   const handleCompleteProduction = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.put(`/production/${selectedLot._id}/complete`, completionData);
+      const res = await api.put(`/production/${selectedLot._id}/complete`, completionData);
+      console.log('Production lot completed:', res.data);
       setIsCompleteModalOpen(false);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
