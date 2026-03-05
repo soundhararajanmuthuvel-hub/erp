@@ -185,7 +185,20 @@ const RawMaterials = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-            <h2 className="text-xl font-bold mb-6">{isEditMode ? 'Edit Material' : 'Add New Material'}</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">{isEditMode ? 'Edit Material' : 'Add New Material'}</h2>
+              {!isEditMode && (
+                <button 
+                  type="button" 
+                  onClick={() => setNewMaterial({
+                    name: 'Sample Raw Material', unit: 'kg', lowStockThreshold: 5
+                  })}
+                  className="text-xs text-emerald-600 font-bold hover:underline"
+                >
+                  Quick Fill
+                </button>
+              )}
+            </div>
             <form onSubmit={handleAddMaterial} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Name</label>

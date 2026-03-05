@@ -183,7 +183,20 @@ const Customers = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-            <h2 className="text-xl font-bold mb-6">{isEditMode ? 'Edit Customer' : 'Add New Customer'}</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">{isEditMode ? 'Edit Customer' : 'Add New Customer'}</h2>
+              {!isEditMode && (
+                <button 
+                  type="button" 
+                  onClick={() => setNewCustomer({
+                    name: 'John Doe', phone: '9876543210', email: 'john@example.com', address: '123, Main St, Chennai', gstNumber: '33AAAAA0000A1Z5', creditLimit: 50000
+                  })}
+                  className="text-xs text-emerald-600 font-bold hover:underline"
+                >
+                  Quick Fill
+                </button>
+              )}
+            </div>
             <form onSubmit={handleCreateCustomer} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Full Name</label>
